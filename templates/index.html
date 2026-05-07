@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Chataia</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 2rem auto;
+        }
+        #chatbox {
+            border: 1px solid #ccc;
+            padding: 10px;
+            height: 300px;
+            overflow-y: auto;
+            margin-bottom: 1rem;
+        }
+        .user {
+            color: blue;
+            margin: 5px 0;
+        }
+        .bot {
+            color: green;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chataia - Chatbot</h1>
+    <div id="chatbox"></div>
+    <form id="chat-form">
+        <input type="text" id="prompt" placeholder="Type your message..." required style="width: 80%;">
+        <button type="submit">Send</button>
+    </form>
+
+    <script>
+        const form = document.getElementById("chat-form"); 
+        const input = document.getElementById("prompt");
+        const chatbox = document.getElementById("chatbox");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault(); <!-- stops the form from refreshing the page, which is default browser behavior -->
+            const userMsg = input.value;
+
+<!-- add a new line to the chatbox showing what the user typed -->
+            chatbox.innerHTML += `<div class="user"><b>You:</b> ${userMsg}</div>`;
+
+<!-- send a request to Flask server -->
+            const res = await fetch("/chataia", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ prompt: userMsg })
+            });
+
+            const data = await res.json();
+
+            // Show bot response
+            chatbox.innerHTML += `<div class="bot"><b>Bot:</b> ${data.response}</div>`;
+
+            chatbox.scrollTop = chatbox.scrollHeight;
+            input.value = ""; <!-- clears the text box so the user can type a new message -->
+        });
+    </script>
+</body>
+</html>

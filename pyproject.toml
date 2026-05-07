@@ -1,0 +1,11 @@
+[project]
+name = "chataia-run-local-chatbot-with-ollama"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "flask>=3.1.3",
+    "gunicorn>=26.0.0",
+    "ollama>=0.6.2",
+]
