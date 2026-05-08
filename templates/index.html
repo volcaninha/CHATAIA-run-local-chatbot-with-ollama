@@ -4,36 +4,180 @@
     <meta charset="UTF-8">
     <title>Chataia</title>
     <style>
+        :root {
+            --bg-main: #071226;
+            --bg-card: #0d1b35;
+            --bg-chat: #0a1730;
+            --border: #2a4e85;
+            --text-main: #e8f1ff;
+            --text-muted: #a5c4ee;
+            --user-bubble: #1e66d6;
+            --bot-bubble: #153763;
+            --accent: #6db6ff;
+            --accent-strong: #3e8cff;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 2rem auto;
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Segoe UI", Arial, sans-serif;
+            color: var(--text-main);
+            background: radial-gradient(circle at 20% 15%, #123c7a 0%, #081325 45%, #050d1a 100%);
+            display: grid;
+            place-items: center;
+            padding: 1.5rem;
         }
+
+        .container {
+            width: min(760px, 100%);
+            background: linear-gradient(180deg, rgba(14, 34, 66, 0.95), rgba(7, 20, 39, 0.96));
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            box-shadow: 0 16px 42px rgba(2, 6, 12, 0.65), inset 0 1px 0 rgba(138, 198, 255, 0.15);
+            overflow: hidden;
+        }
+
+        .header {
+            padding: 1rem 1.2rem;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(120deg, rgba(29, 67, 128, 0.45), rgba(14, 32, 61, 0.25));
+        }
+
+        .title {
+            margin: 0;
+            font-size: 1.35rem;
+            letter-spacing: 0.02em;
+        }
+
         #chatbox {
-            border: 1px solid #ccc;
-            padding: 10px;
-            height: 300px;
+            margin: 1rem;
+            border: 1px solid #234877;
+            border-radius: 12px;
+            padding: 0.9rem;
+            min-height: 340px;
+            max-height: 56vh;
             overflow-y: auto;
-            margin-bottom: 1rem;
+            background: linear-gradient(180deg, rgba(6, 17, 35, 0.9), rgba(7, 23, 47, 0.9));
+            box-shadow: inset 0 0 22px rgba(109, 182, 255, 0.08);
+            scroll-behavior: smooth;
         }
+
+        .message {
+            width: fit-content;
+            max-width: 88%;
+            padding: 0.58rem 0.78rem;
+            margin: 0.48rem 0;
+            border-radius: 12px;
+            line-height: 1.4;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
         .user {
-            color: blue;
-            margin: 5px 0;
+            margin-left: auto;
+            background: linear-gradient(180deg, #2b73de, #1f5ebd);
+            border: 1px solid #528fe9;
+            color: #eef7ff;
+            box-shadow: 0 5px 15px rgba(25, 78, 156, 0.35);
         }
+
         .bot {
-            color: green;
-            margin: 5px 0;
+            margin-right: auto;
+            background: linear-gradient(180deg, #163e6f, #112f55);
+            border: 1px solid #325e97;
+            color: #dceeff;
+            box-shadow: 0 5px 15px rgba(5, 15, 28, 0.35);
+        }
+
+        .controls {
+            padding: 0.2rem 1rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+        }
+
+        #chat-form {
+            display: flex;
+            gap: 0.55rem;
+            width: 100%;
+        }
+
+        #prompt {
+            flex: 1;
+            min-width: 0;
+            padding: 0.62rem 0.7rem;
+            border-radius: 10px;
+            border: 1px solid #39639d;
+            background: rgba(7, 21, 40, 0.92);
+            color: var(--text-main);
+            outline: none;
+        }
+
+        #prompt::placeholder {
+            color: #89addc;
+        }
+
+        #prompt:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(109, 182, 255, 0.22);
+        }
+
+        button {
+            border: 1px solid #4d7fbe;
+            border-radius: 10px;
+            padding: 0.62rem 0.9rem;
+            color: #f3f9ff;
+            background: linear-gradient(180deg, #2b6fd4, #2058aa);
+            cursor: pointer;
+            transition: transform 0.1s ease, filter 0.15s ease, opacity 0.2s ease;
+        }
+
+        button:hover:not(:disabled) {
+            filter: brightness(1.07);
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        #new-chat-btn {
+            white-space: nowrap;
+            background: linear-gradient(180deg, #366ab0, #2a4f84);
+            border-color: #4f7fc4;
+        }
+
+        @media (max-width: 680px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            #chat-form {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Chataia - Chatbot</h1>
-    <div id="chatbox"></div>
-    <button id="new-chat-btn" type="button">New Chat</button>
-    <form id="chat-form">
-        <input type="text" id="prompt" placeholder="Type your message..." required style="width: 80%;">
-        <button type="submit">Send</button>
-    </form>
+    <main class="container">
+        <header class="header">
+            <h1 class="title">🍄 Chataia - Your Local Chatbot</h1>
+        </header>
+        <div id="chatbox"></div>
+        <div class="controls">
+            <button id="new-chat-btn" type="button">🌙 New Chat</button>
+            <form id="chat-form">
+                <input type="text" id="prompt" placeholder="Whisper your message into the ether..." required>
+                <button type="submit">✨ Send</button>
+            </form>
+        </div>
+    </main>
 
     <script>
         const form = document.getElementById("chat-form"); 
@@ -43,13 +187,13 @@
         const sendButton = form.querySelector("button");
 
         const appendUserMessage = (message) => {
-            chatbox.innerHTML += `<div class="user"><b>You:</b> ${message}</div>`;
+            chatbox.innerHTML += `<div class="message user"><b>🧙 You:</b> ${message}</div>`;
         };
 
         const appendBotPlaceholder = () => {
             const botDiv = document.createElement("div");
-            botDiv.className = "bot";
-            botDiv.innerHTML = "<b>Bot:</b> ";
+            botDiv.className = "message bot";
+            botDiv.innerHTML = "<b>🪄 Bot:</b> ";
             chatbox.appendChild(botDiv);
             return botDiv;
         };
@@ -66,7 +210,7 @@
                 input.value = "";
                 input.focus();
             } catch (error) {
-                chatbox.innerHTML += `<div class="bot"><b>Bot:</b> Error: ${error.message}</div>`;
+                chatbox.innerHTML += `<div class="message bot"><b>🪄 Bot:</b> Error: ${error.message}</div>`;
                 chatbox.scrollTop = chatbox.scrollHeight;
             } finally {
                 newChatBtn.disabled = false;
@@ -120,7 +264,7 @@
 
                         const payload = JSON.parse(eventBlock.slice(6));
                         if (payload.error) {
-                            botDiv.innerHTML = `<b>Bot:</b> ${payload.error}`;
+                            botDiv.innerHTML = `<b>🪄 Bot:</b> ${payload.error}`;
                             continue;
                         }
                         if (payload.token) {
@@ -131,7 +275,7 @@
                     chatbox.scrollTop = chatbox.scrollHeight;
                 }
             } catch (error) {
-                botDiv.innerHTML = `<b>Bot:</b> Error: ${error.message}`;
+                botDiv.innerHTML = `<b>🪄 Bot:</b> Error: ${error.message}`;
             } finally {
                 sendButton.disabled = false;
                 newChatBtn.disabled = false;
