@@ -8,6 +8,7 @@ The application supports session-based chat history, JSON API endpoints, health 
 ## Features :bulb:
 
 - Flask backend with REST API
+- Real-time streaming responses from Ollama (token-by-token)
 - Configurable AI model support via environment variable `OLLAMA_MODEL` (default: `llama3.1:8b`)
 - JSON request validation
 - Session-based conversation memory using Flask session IDs
@@ -87,12 +88,22 @@ http://127.0.0.1:8000/
 curl http://127.0.0.1:8000/health
 ```
 
-7. Send a chat request directly (optional):
+7. Send a chat request directly (optional, streaming output):
 
 ```bash
-curl -X POST http://127.0.0.1:8000/chataia \
+curl -N -X POST http://127.0.0.1:8000/chataia \
   -H "Content-Type: application/json" \
   -d '{"prompt":"Hello, who are you?"}'
+```
+
+You will receive a stream of `data:` events (Server-Sent Events style), for example:
+
+```text
+data: {"token":"Hello"}
+
+data: {"token":" there!"}
+
+data: {"done":true}
 ```
 
 ## :loudspeaker: Error Handling

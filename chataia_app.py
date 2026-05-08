@@ -4,9 +4,10 @@
 import os
 import secrets
 import threading
+import json
 
 import ollama
-from flask import Flask, request, render_template, jsonify, session
+from flask import Flask, request, render_template, jsonify, session, Response, stream_with_context
 
 MODEL_NAME = os.environ.get("OLLAMA_MODEL", "llama3.1:8b")
 MAX_HISTORY_MESSAGES = 20
@@ -19,6 +20,14 @@ def get_bot_response(messages, model=MODEL_NAME):
         messages=messages,
     )
     return response.message.content
+
+
+def stream_bot_response(messages, model=MODEL_NAME):
+    return ollama.chat(
+        model=model,
+        messages=messages,
+        stream=True,
+    )
 
 
 app = Flask(__name__)
@@ -89,16 +98,31 @@ def chat():
     user_message = {'role': 'user', 'content': user_prompt.strip()}
     messages = [*history, user_message]
 
-    try:
-        bot_response = get_bot_response(messages)
-    except Exception as exc:
-        return jsonify({"error": f"Failed to get response from model: {exc}"}), 503
+    @stream_with_context
+    def event_stream():
+        chunks = []
+        try:
+            for response_chunk in stream_bot_response(messages):
+                if isinstance(response_chunk, dict):
+                    message_payload = response_chunk.get("message", {})
+                    token = message_payload.get("content", "")
+                else:
+                    message_payload = getattr(response_chunk, "message", None)
+                    token = getattr(message_payload, "content", "") if message_payload else ""
 
-    updated_history = [*history, user_message, {'role': 'assistant', 'content': bot_response}]
-    _save_history(session_id, updated_history)
+                if token:
+                    chunks.append(token)
+                    yield f"data: {json.dumps({'token': token})}\n\n"
+        except Exception as exc:
+            yield f"data: {json.dumps({'error': f'Failed to get response from model: {exc}'})}\n\n"
+            return
 
-    # javascript in html expects json format
-    return jsonify({"response": bot_response})
+        full_response = "".join(chunks)
+        updated_history = [*history, user_message, {"role": "assistant", "content": full_response}]
+        _save_history(session_id, updated_history)
+        yield f"data: {json.dumps({'done': True})}\n\n"
+
+    return Response(event_stream(), mimetype="text/event-stream")
 
 
 @app.route("/health", methods=["GET"])
