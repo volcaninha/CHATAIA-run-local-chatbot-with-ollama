@@ -78,6 +78,11 @@ def _save_history(session_id, history):
     with session_lock:
         session_histories[session_id] = bounded_history
 
+
+def _reset_history(session_id):
+    with session_lock:
+        session_histories.pop(session_id, None)
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -123,6 +128,13 @@ def chat():
         yield f"data: {json.dumps({'done': True})}\n\n"
 
     return Response(event_stream(), mimetype="text/event-stream")
+
+
+@app.route("/new-chat", methods=["POST"])
+def new_chat():
+    session_id = _get_session_id()
+    _reset_history(session_id)
+    return jsonify({"status": "ok", "message": "Chat history cleared."}), 200
 
 
 @app.route("/health", methods=["GET"])

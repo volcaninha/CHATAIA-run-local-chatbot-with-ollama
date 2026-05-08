@@ -29,6 +29,7 @@
 <body>
     <h1>Chataia - Chatbot</h1>
     <div id="chatbox"></div>
+    <button id="new-chat-btn" type="button">New Chat</button>
     <form id="chat-form">
         <input type="text" id="prompt" placeholder="Type your message..." required style="width: 80%;">
         <button type="submit">Send</button>
@@ -38,6 +39,8 @@
         const form = document.getElementById("chat-form"); 
         const input = document.getElementById("prompt");
         const chatbox = document.getElementById("chatbox");
+        const newChatBtn = document.getElementById("new-chat-btn");
+        const sendButton = form.querySelector("button");
 
         const appendUserMessage = (message) => {
             chatbox.innerHTML += `<div class="user"><b>You:</b> ${message}</div>`;
@@ -51,6 +54,26 @@
             return botDiv;
         };
 
+        newChatBtn.addEventListener("click", async () => {
+            newChatBtn.disabled = true;
+            sendButton.disabled = true;
+            try {
+                const res = await fetch("/new-chat", { method: "POST" });
+                if (!res.ok) {
+                    throw new Error(`Request failed with status ${res.status}`);
+                }
+                chatbox.innerHTML = "";
+                input.value = "";
+                input.focus();
+            } catch (error) {
+                chatbox.innerHTML += `<div class="bot"><b>Bot:</b> Error: ${error.message}</div>`;
+                chatbox.scrollTop = chatbox.scrollHeight;
+            } finally {
+                newChatBtn.disabled = false;
+                sendButton.disabled = false;
+            }
+        });
+
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
             const userMsg = input.value.trim();
@@ -62,7 +85,8 @@
             const botDiv = appendBotPlaceholder();
             chatbox.scrollTop = chatbox.scrollHeight;
             input.value = "";
-            form.querySelector("button").disabled = true;
+            sendButton.disabled = true;
+            newChatBtn.disabled = true;
 
             try {
                 const res = await fetch("/chataia", {
@@ -109,7 +133,8 @@
             } catch (error) {
                 botDiv.innerHTML = `<b>Bot:</b> Error: ${error.message}`;
             } finally {
-                form.querySelector("button").disabled = false;
+                sendButton.disabled = false;
+                newChatBtn.disabled = false;
                 chatbox.scrollTop = chatbox.scrollHeight;
             }
         });

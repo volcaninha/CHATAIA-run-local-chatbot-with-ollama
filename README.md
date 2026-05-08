@@ -12,10 +12,12 @@ The application supports session-based chat history, JSON API endpoints, health 
 - Configurable AI model support via environment variable `OLLAMA_MODEL` (default: `llama3.1:8b`)
 - JSON request validation
 - Session-based conversation memory using Flask session IDs
+- "New Chat" button in the UI to instantly clear the current session conversation
 - Flask secret key setup via `FLASK_SECRET_KEY`
 - History bounding (`MAX_HISTORY_MESSAGES`) to prevent unbounded memory growth
 - Automatic model availability validation on startup (`_is_model_available`, `_startup_check`)
 - GET /health endpoint that reports model/app readiness and returns `503` when unhealthy
+- POST /new-chat endpoint to reset in-memory chat history for the current browser session
 
 ## Prerequisites :briefcase:
 
@@ -104,6 +106,15 @@ data: {"token":"Hello"}
 data: {"token":" there!"}
 
 data: {"done":true}
+```
+
+8. Start a fresh conversation without reloading (optional):
+
+From the web UI, click **New Chat** to clear the chat window and reset the backend history for your current session.
+You can also call the endpoint directly:
+
+```bash
+curl -X POST http://127.0.0.1:8000/new-chat
 ```
 
 ## :loudspeaker: Error Handling
